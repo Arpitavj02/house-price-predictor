@@ -348,15 +348,7 @@
     <div class="error-box" id="error-box"></div>
   </div>
 
-  <div class="footer">
-    Built by [Your Name] &middot; scikit-learn + Flask &middot; Data source: Jaipur property listings
-  </div>
 
-  <!--
-    FIX: Jinja2 template data is injected into a type="application/json" script tag.
-    This keeps it invisible to the JS linter (no more "Property assignment expected" errors),
-    while still being fully accessible to JavaScript via JSON.parse().
-  -->
   <script id="ppsf-data" type="application/json">{{ locality_avg_ppsf | tojson }}</script>
 
   <script>
