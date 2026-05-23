@@ -3,275 +3,546 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>House Price Predictor</title>
+  <title>Jaipur House Price Predictor</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4f8;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #eef2f7;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 24px;
+      justify-content: flex-start;
+      padding: 32px 16px 48px;
     }
 
-    .card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 40px;
-      max-width: 560px;
-      width: 100%;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-    }
-
-    .badge {
-      display: inline-block;
-      background: #e8f4ff;
-      color: #1a6fbe;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-    }
-
-    h1 {
-      font-size: 26px;
-      font-weight: 700;
-      color: #1a1a2e;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      color: #6b7280;
-      font-size: 14px;
+    /* ── Header ── */
+    .header {
+      text-align: center;
       margin-bottom: 28px;
     }
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+    .header p {
+      font-size: 14px;
+      color: #6b7280;
+      max-width: 440px;
+      margin: 0 auto;
+      line-height: 1.55;
+    }
 
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 36px 36px 32px;
+      width: 100%;
+      max-width: 620px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.07);
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      padding-bottom: 2px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    /* ── Grid ── */
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 16px 20px;
     }
-
     .field { display: flex; flex-direction: column; gap: 6px; }
     .field.full { grid-column: 1 / -1; }
 
     label {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       color: #374151;
+      letter-spacing: 0.02em;
     }
 
+    /* ── Search-able locality wrapper ── */
+    .locality-wrap { position: relative; }
+    .locality-wrap input[type="text"] {
+      width: 100%;
+      padding: 10px 36px 10px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 9px;
+      font-size: 14px;
+      color: #111827;
+      background: #fafafa;
+      transition: border-color 0.18s;
+    }
+    .locality-wrap input[type="text"]:focus { outline: none; border-color: #3b82f6; background:#fff; }
+    .locality-wrap .search-icon {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      color: #9ca3af; font-size: 15px; pointer-events: none;
+    }
+    .dropdown-list {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      max-height: 220px; overflow-y: auto; z-index: 100;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10); display: none;
+    }
+    .dropdown-list.open { display: block; }
+    .dropdown-item {
+      padding: 10px 14px; font-size: 13px; color: #374151; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .dropdown-item:hover, .dropdown-item.highlighted { background: #eff6ff; color: #1d4ed8; }
+    .dropdown-item .loc-rate {
+      float: right; font-size: 11px; color: #9ca3af; font-weight: 500;
+    }
+    .locality-hint {
+      font-size: 11px; color: #6b7280; margin-top: 4px; min-height: 16px;
+    }
+    .locality-hint span { color: #2563eb; font-weight: 600; }
+
+    /* ── Standard inputs ── */
     input[type="number"], select {
       padding: 10px 14px;
       border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
+      border-radius: 9px;
       font-size: 14px;
-      color: #1a1a2e;
-      transition: border-color 0.2s;
+      color: #111827;
       background: #fafafa;
-    }
-
-    input[type="number"]:focus, select:focus {
-      outline: none;
-      border-color: #3b82f6;
-      background: #fff;
-    }
-
-    .toggle-row {
-      display: flex;
-      gap: 12px;
-    }
-
-    .toggle-btn {
-      flex: 1;
-      padding: 10px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      background: #fafafa;
-      font-size: 13px;
-      font-weight: 500;
-      color: #6b7280;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-
-    .toggle-btn.active {
-      border-color: #3b82f6;
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
-
-    .predict-btn {
       width: 100%;
-      padding: 14px;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: background 0.2s, transform 0.1s;
+      transition: border-color 0.18s;
+      appearance: none;
     }
+    input[type="number"]:focus, select:focus { outline: none; border-color: #3b82f6; background: #fff; }
 
+    /* Custom select arrow */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '▾'; position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%); pointer-events: none; color: #9ca3af; font-size: 13px;
+    }
+    .select-wrap select { padding-right: 30px; }
+
+    /* ── Toggle buttons ── */
+    .toggle-row { display: flex; gap: 10px; }
+    .toggle-btn {
+      flex: 1; padding: 9px 10px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 9px;
+      background: #fafafa;
+      font-size: 13px; font-weight: 600; color: #6b7280;
+      cursor: pointer; text-align: center;
+      transition: all 0.15s; user-select: none;
+    }
+    .toggle-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+
+    /* ── Predict button ── */
+    .predict-btn {
+      width: 100%; margin-top: 24px; padding: 14px;
+      background: #2563eb; color: #fff;
+      border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.01em;
+      transition: background 0.18s, transform 0.1s;
+    }
     .predict-btn:hover { background: #1d4ed8; }
-    .predict-btn:active { transform: scale(0.98); }
+    .predict-btn:active { transform: scale(0.985); }
     .predict-btn:disabled { background: #93c5fd; cursor: not-allowed; }
 
+    /* ── Result ── */
     .result {
       margin-top: 24px;
-      padding: 20px;
-      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
-      border-radius: 12px;
-      border: 1px solid #bfdbfe;
-      display: none;
-      text-align: center;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 14px;
+      padding: 22px 20px 18px;
+      display: none; text-align: center;
     }
-
     .result.show { display: block; }
-    .result .label { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
-    .result .price { font-size: 32px; font-weight: 800; color: #1d4ed8; }
-    .result .note  { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+    .result .res-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+    .result .price { font-size: 38px; font-weight: 900; color: #065f46; letter-spacing: -0.5px; }
 
-    .error-box {
-      margin-top: 16px;
-      padding: 12px 16px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      color: #dc2626;
-      font-size: 13px;
-      display: none;
+    .breakdown {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-top: 16px;
+    }
+    .bitem {
+      background: #fff; border: 1px solid #d1fae5;
+      border-radius: 10px; padding: 10px 8px; text-align: center;
+    }
+    .bitem .bi-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .bitem .bi-val   { font-size: 13px; font-weight: 700; color: #111827; }
+
+    .vs-bar {
+      margin-top: 14px; background: #dcfce7; border-radius: 8px; padding: 8px 14px;
+      font-size: 12px; color: #065f46; font-weight: 600;
     }
 
+    .result .note { font-size: 11px; color: #9ca3af; margin-top: 12px; line-height: 1.5; }
+
+    /* ── Error ── */
+    .error-box {
+      margin-top: 14px; padding: 11px 16px;
+      background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 9px; color: #dc2626; font-size: 13px; display: none;
+    }
     .error-box.show { display: block; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 20px; font-size: 11px; color: #9ca3af; text-align: center; line-height: 1.6;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 500px) {
+      .card { padding: 24px 18px 22px; }
+      .grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: 1; }
+      .breakdown { grid-template-columns: 1fr 1fr; }
+      .header h1 { font-size: 23px; }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <!-- <div class="badge">ML PROJECT · LINEAR REGRESSION</div> -->
-    <h1>🏡 House Price Predictor</h1>
-    <p class="subtitle">Enter property details to get an estimated market price instantly.</p>
 
+  <div class="header">
+    <!-- <div class="badge">ML Project &middot; Jaipur &middot; May 2026</div> -->
+    <h1>House Price Predictor</h1>
+    <p>Enter property details to get an estimated market price across 55 Jaipur localities.</p>
+  </div>
+
+  <div class="card">
     <div class="grid">
+
+      <!-- ── Locality search ── -->
+      <div class="field full">
+        <label>Locality</label>
+        <div class="locality-wrap">
+          <input type="text" id="locality-search" placeholder="Search locality…" autocomplete="off"
+                 oninput="filterLocalities()" onfocus="openDropdown()" onblur="closeDropdown()" onkeydown="handleKey(event)">
+          <span class="search-icon">⌕</span>
+          <div class="dropdown-list" id="dropdown">
+            {% for loc in localities %}
+            <div class="dropdown-item" data-value="{{ loc }}"
+                 onmousedown="selectLocality('{{ loc }}')">
+              {{ loc }}
+              <span class="loc-rate">₹{{ locality_avg_ppsf[loc] | int }}/sqft</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <input type="hidden" id="locality-value">
+        <div class="locality-hint" id="locality-hint">Start typing to search a locality</div>
+      </div>
+
+      <!-- ── Property details ── -->
+      <!-- <div class="section-label">Property details</div> -->
+
+      <div class="field">
+        <label>Property type</label>
+        <div class="select-wrap">
+          <select id="property_type" onchange="onPropTypeChange()">
+            <option value="Apartment">Apartment / Flat</option>
+            <option value="Plot">Plot / Independent House</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>BHK</label>
+        <div class="select-wrap">
+          <select id="bhk" onchange="syncBathrooms()">
+            <option value="1">1 BHK</option>
+            <option value="2">2 BHK</option>
+            <option value="3" selected>3 BHK</option>
+            <option value="4">4 BHK</option>
+            <option value="5">5 BHK</option>
+          </select>
+        </div>
+      </div>
+
       <div class="field">
         <label>Area (sq ft)</label>
-        <input type="number" id="area" placeholder="e.g. 1500" min="100" max="10000">
+        <input type="number" id="area" placeholder="e.g. 1200" min="100" max="10000">
       </div>
-      <div class="field">
-        <label>Bedrooms</label>
-        <select id="bedrooms">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-      </div>
+
       <div class="field">
         <label>Bathrooms</label>
-        <select id="bathrooms">
-          <option value="1">1</option>
-          <option value="2" selected>2</option>
-          <option value="3">3</option>
-        </select>
+        <div class="select-wrap">
+          <select id="bathrooms">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
       </div>
+
       <div class="field">
-        <label>Age (years)</label>
-        <input type="number" id="age" placeholder="e.g. 5" min="0" max="100">
+        <label>Age of property (years)</label>
+        <input type="number" id="age" placeholder="e.g. 3" min="0" max="50">
       </div>
+
+      <div class="field" id="floor-field">
+        <label>Floor number</label>
+        <input type="number" id="floor" placeholder="0 = ground" min="0" max="30" value="0">
+      </div>
+
+      <!-- ── Furnishing & Parking ── -->
+      <div class="section-label">Condition &amp; amenities</div>
+
       <div class="field full">
-        <label>Distance from city centre (km)</label>
-        <input type="number" id="distance" placeholder="e.g. 10" min="0.5" max="100" step="0.5">
-      </div>
-      <div class="field">
-        <label>Garage</label>
+        <label>Furnishing status</label>
         <div class="toggle-row">
-          <div class="toggle-btn active" id="garage-yes" onclick="setToggle('garage', 1)">Yes</div>
-          <div class="toggle-btn" id="garage-no"  onclick="setToggle('garage', 0)">No</div>
+          <div class="toggle-btn" id="furn-0" onclick="setFurn(0)">Unfurnished</div>
+          <div class="toggle-btn active" id="furn-1" onclick="setFurn(1)">Semi-furnished</div>
+          <div class="toggle-btn" id="furn-2" onclick="setFurn(2)">Fully furnished</div>
         </div>
       </div>
-      <div class="field">
-        <label>Garden</label>
+
+      <div class="field full" id="parking-field">
+        <label>Covered parking</label>
         <div class="toggle-row">
-          <div class="toggle-btn active" id="garden-yes" onclick="setToggle('garden', 1)">Yes</div>
-          <div class="toggle-btn" id="garden-no"  onclick="setToggle('garden', 0)">No</div>
+          <div class="toggle-btn active" id="parking-yes" onclick="setParking(1)">Yes</div>
+          <div class="toggle-btn"        id="parking-no"  onclick="setParking(0)">No</div>
         </div>
       </div>
-    </div>
+
+    </div><!-- /grid -->
 
     <button class="predict-btn" id="btn" onclick="predict()">Predict Price</button>
 
+    <!-- Result -->
     <div class="result" id="result">
-      <div class="label">Estimated Market Price</div>
+      <div class="res-label">Estimated Market Price</div>
       <div class="price" id="price-output">—</div>
-      <div class="note">Based on Linear Regression model · For demo purposes</div>
+      <div class="breakdown" id="breakdown"></div>
+      <div class="vs-bar" id="vs-bar"></div>
+      <div class="note">Based on Gradient Boosting model trained on 55 Jaipur localities &middot; May 2026 data &middot; For reference only</div>
     </div>
 
     <div class="error-box" id="error-box"></div>
   </div>
 
-  <script>
-    const toggleState = { garage: 1, garden: 1 };
+  <div class="footer">
+    Built by [Your Name] &middot; scikit-learn + Flask &middot; Data source: Jaipur property listings
+  </div>
 
-    function setToggle(name, val) {
-      toggleState[name] = val;
-      document.getElementById(name + '-yes').classList.toggle('active', val === 1);
-      document.getElementById(name + '-no').classList.toggle('active',  val === 0);
+  <!--
+    FIX: Jinja2 template data is injected into a type="application/json" script tag.
+    This keeps it invisible to the JS linter (no more "Property assignment expected" errors),
+    while still being fully accessible to JavaScript via JSON.parse().
+  -->
+  <script id="ppsf-data" type="application/json">{{ locality_avg_ppsf | tojson }}</script>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────────────────────
+    let furnishing = 1;
+    let parking    = 1;
+    let highlightIdx = -1;
+    let allItems = [];
+
+    // Read locality avg ppsf from the JSON script tag (avoids Jinja2 inside JS).
+    const PPSF = JSON.parse(document.getElementById('ppsf-data').textContent);
+
+    // ── On load ────────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      allItems = Array.from(document.querySelectorAll('.dropdown-item'));
+      onPropTypeChange();
+    });
+
+    // ── Locality search ────────────────────────────────────────────────────────
+    function filterLocalities() {
+      const q = document.getElementById('locality-search').value.toLowerCase().trim();
+      highlightIdx = -1;
+      allItems.forEach(el => {
+        const match = el.dataset.value.toLowerCase().includes(q);
+        el.style.display = match ? '' : 'none';
+        el.classList.remove('highlighted');
+      });
+      document.getElementById('dropdown').classList.add('open');
     }
 
+    function openDropdown() {
+      filterLocalities();
+      document.getElementById('dropdown').classList.add('open');
+    }
+
+    function closeDropdown() {
+      setTimeout(() => document.getElementById('dropdown').classList.remove('open'), 180);
+    }
+
+    function handleKey(e) {
+      const visible = allItems.filter(el => el.style.display !== 'none');
+      if (e.key === 'ArrowDown') {
+        highlightIdx = Math.min(highlightIdx + 1, visible.length - 1);
+      } else if (e.key === 'ArrowUp') {
+        highlightIdx = Math.max(highlightIdx - 1, 0);
+      } else if (e.key === 'Enter' && highlightIdx >= 0) {
+        selectLocality(visible[highlightIdx].dataset.value);
+        return;
+      } else { return; }
+      visible.forEach((el, i) => el.classList.toggle('highlighted', i === highlightIdx));
+    }
+
+    function selectLocality(loc) {
+      document.getElementById('locality-search').value = loc;
+      document.getElementById('locality-value').value  = loc;
+      document.getElementById('dropdown').classList.remove('open');
+      const ppsf = PPSF[loc];
+      const hint = document.getElementById('locality-hint');
+      if (ppsf) {
+        hint.innerHTML = `Avg market rate (May 2026): <span>&#8377;${ppsf.toLocaleString('en-IN')}/sq ft</span>`;
+      }
+      hideError();
+      document.getElementById('result').classList.remove('show');
+    }
+
+    // ── Property type toggle ───────────────────────────────────────────────────
+    function onPropTypeChange() {
+      const type = document.getElementById('property_type').value;
+      const floorField   = document.getElementById('floor-field');
+      const parkingField = document.getElementById('parking-field');
+
+      if (type === 'Plot') {
+        floorField.style.display   = 'none';
+        parkingField.style.display = 'none';
+        parking = 1; // plots always have space
+      } else {
+        floorField.style.display   = '';
+        parkingField.style.display = '';
+      }
+    }
+
+    // ── BHK → suggest bathrooms ───────────────────────────────────────────────
+    function syncBathrooms() {
+      const bhk = parseInt(document.getElementById('bhk').value);
+      const sug = Math.min(Math.max(bhk - 1, 1), 4);
+      document.getElementById('bathrooms').value = sug;
+    }
+
+    // ── Furnishing toggle ──────────────────────────────────────────────────────
+    function setFurn(val) {
+      furnishing = val;
+      [0, 1, 2].forEach(i => document.getElementById('furn-' + i).classList.toggle('active', i === val));
+    }
+
+    // ── Parking toggle ────────────────────────────────────────────────────────
+    function setParking(val) {
+      parking = val;
+      document.getElementById('parking-yes').classList.toggle('active', val === 1);
+      document.getElementById('parking-no').classList.toggle('active',  val === 0);
+    }
+
+    // ── Predict ───────────────────────────────────────────────────────────────
     async function predict() {
+      const locality = document.getElementById('locality-value').value;
       const area     = document.getElementById('area').value;
       const age      = document.getElementById('age').value;
-      const distance = document.getElementById('distance').value;
+      const propType = document.getElementById('property_type').value;
+      const floor    = propType === 'Plot' ? 0 : parseInt(document.getElementById('floor').value || 0);
 
-      if (!area || !age || !distance) {
-        showError('Please fill in all fields.');
-        return;
-      }
+      // Validation
+      if (!locality)                        { showError('Please select a locality from the list.'); return; }
+      if (!area || parseFloat(area) < 100)  { showError('Please enter a valid area (min 100 sq ft).'); return; }
+      if (area > 10000)                     { showError('Area seems too large. Please check (max 10,000 sq ft).'); return; }
+      if (age === '' || parseInt(age) < 0)  { showError('Please enter property age (0 for new).'); return; }
+      if (parseInt(age) > 50)               { showError('Age should be 50 years or less.'); return; }
 
       const btn = document.getElementById('btn');
-      btn.disabled = true;
-      btn.textContent = 'Predicting…';
+      btn.disabled    = true;
+      btn.textContent = 'Predicting\u2026';
       hideError();
+      document.getElementById('result').classList.remove('show');
 
       const payload = {
-        area_sqft:   parseFloat(area),
-        bedrooms:    parseInt(document.getElementById('bedrooms').value),
-        bathrooms:   parseInt(document.getElementById('bathrooms').value),
-        age_years:   parseInt(age),
-        distance_km: parseFloat(distance),
-        has_garage:  toggleState.garage,
-        has_garden:  toggleState.garden,
+        locality:      locality,
+        property_type: propType,
+        bhk:           parseInt(document.getElementById('bhk').value),
+        bathrooms:     parseInt(document.getElementById('bathrooms').value),
+        area_sqft:     parseFloat(area),
+        age_years:     parseInt(age),
+        floor_number:  floor,
+        furnishing:    furnishing,
+        has_parking:   parking,
       };
 
       try {
         const res  = await fetch('/predict', {
-          method: 'POST',
+          method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body:    JSON.stringify(payload),
         });
         const data = await res.json();
 
         if (data.status === 'success') {
-          const formatted = '₹' + (data.price / 100000).toFixed(2) + ' Lakh';
-          document.getElementById('price-output').textContent = formatted;
+          const price = data.price;
+          const lakh  = price / 100000;
+          const fmt   = lakh >= 100
+            ? '\u20B9' + (lakh / 100).toFixed(2) + ' Cr'
+            : '\u20B9' + lakh.toFixed(2) + ' Lakh';
+
+          document.getElementById('price-output').textContent = fmt;
+
+          const furnLabels = ['Unfurnished', 'Semi-furnished', 'Fully furnished'];
+          const propLabel  = propType === 'Plot' ? 'Plot' : 'Apartment';
+          const ppsf       = data.price_per_sqft;
+          const marketPpsf = data.market_avg_ppsf;
+
+          document.getElementById('breakdown').innerHTML = `
+            <div class="bitem">
+              <div class="bi-label">Price / sq ft</div>
+              <div class="bi-val">&#8377;${ppsf.toLocaleString('en-IN')}</div>
+            </div>
+            <div class="bitem">
+              <div class="bi-label">Property</div>
+              <div class="bi-val">${payload.bhk}BHK ${propLabel}</div>
+            </div>
+            <div class="bitem">
+              <div class="bi-label">Furnishing</div>
+              <div class="bi-val">${furnLabels[furnishing]}</div>
+            </div>
+          `;
+
+          const diff    = ppsf - marketPpsf;
+          const diffPct = ((Math.abs(diff) / marketPpsf) * 100).toFixed(1);
+          const diffStr = diff >= 0
+            ? `\u2191 ${diffPct}% above locality avg (&#8377;${marketPpsf.toLocaleString('en-IN')}/sqft)`
+            : `\u2193 ${diffPct}% below locality avg (&#8377;${marketPpsf.toLocaleString('en-IN')}/sqft)`;
+          document.getElementById('vs-bar').textContent = diffStr;
+
           document.getElementById('result').classList.add('show');
         } else {
-          showError('Prediction failed: ' + data.error);
+          showError('Prediction error: ' + data.error);
         }
       } catch (e) {
-        showError('Could not connect to server. Try again.');
+        showError('Cannot reach server. Is Flask running?');
       } finally {
-        btn.disabled = false;
+        btn.disabled    = false;
         btn.textContent = 'Predict Price';
       }
     }
